@@ -23,7 +23,6 @@ object Protocol {
             .put("id", s.id)
             .put("orig", s.original)
             .put("tr", s.translated)
-            .put("mode", s.mode.name)
             .put("ts", s.timeMs)
             .toString()
 
@@ -41,8 +40,6 @@ object Protocol {
                         id = o.optLong("id"),
                         original = o.optString("orig"),
                         translated = o.optString("tr"),
-                        mode = runCatching { DialectMode.valueOf(o.optString("mode")) }
-                            .getOrDefault(DialectMode.FUSHA),
                         timeMs = o.optLong("ts"),
                     )
                 )

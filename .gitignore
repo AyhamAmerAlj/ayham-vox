@@ -7,3 +7,4 @@ local.properties
 .DS_Store
 node_modules/
 .env
+shared-core/src/main/res/font/

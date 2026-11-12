@@ -8,23 +8,22 @@ import org.junit.Test
 class CoreTest {
 
     @Test
-    fun mockTranslatesKnownLineInBothModes() {
+    fun mockTranslatesKnownLine() {
         val engine = MockTranslationEngine()
-        assertEquals("احذر! خلفك!", engine.translate("Watch out behind you!", DialectMode.FUSHA))
-        assertEquals("دير بالك! وراك!", engine.translate("Watch out behind you!", DialectMode.IRAQI))
+        assertEquals("احذر! خلفك!", engine.translate("Watch out behind you!"))
     }
 
     @Test
     fun mockMarksUnknownLine() {
         val engine = MockTranslationEngine()
-        assertEquals("[تجريبي] Hello", engine.translate("Hello", DialectMode.FUSHA))
+        assertEquals("[تجريبي] Hello", engine.translate("Hello"))
     }
 
     @Test
     fun allSampleLinesAreTranslated() {
         val engine = MockTranslationEngine()
         engine.sampleLines.forEach {
-            assertFalse(engine.translate(it, DialectMode.IRAQI).startsWith("[تجريبي]"))
+            assertFalse(engine.translate(it).startsWith("[تجريبي]"))
         }
     }
 
@@ -38,9 +37,8 @@ class CoreTest {
 
     @Test
     fun subtitleSurvivesProtocolRoundTrip() {
-        val s = Subtitle(7, "Good job, team!", "عاشت ايديكم يا فريق!", DialectMode.IRAQI, 123L)
-        val parsed = Protocol.parse(Protocol.subtitle(s))
-        assertEquals(Protocol.Message.Sub(s), parsed)
+        val s = Subtitle(7, "Good job, team!", "أحسنتم يا فريق!", 123L)
+        assertEquals(Protocol.Message.Sub(s), Protocol.parse(Protocol.subtitle(s)))
     }
 
     @Test

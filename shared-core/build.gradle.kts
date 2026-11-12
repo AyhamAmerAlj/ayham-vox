@@ -23,6 +23,8 @@ android {
 dependencies {
     api("org.java-websocket:Java-WebSocket:1.5.7")
     implementation("androidx.core:core-ktx:1.15.0")
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    implementation("androidx.compose.material3:material3")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")

@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.ayham.vox.core.VoxTypography
 
 object VoxColors {
     val Black = Color(0xFF05050A)
@@ -27,6 +28,7 @@ fun VoxTheme(content: @Composable () -> Unit) {
             surfaceVariant = VoxColors.Card,
             onSurfaceVariant = VoxColors.Gray,
         ),
+        typography = VoxTypography,
         content = content,
     )
 }

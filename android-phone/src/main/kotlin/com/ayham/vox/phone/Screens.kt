@@ -40,7 +40,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ayham.vox.core.DialectMode
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.ayham.vox.core.UpdateState
 import com.ayham.vox.core.VoxClient
 import com.ayham.vox.core.label
@@ -98,7 +103,10 @@ fun VoxApp(vm: PhoneViewModel) {
 private fun HomeScreen(vm: PhoneViewModel, state: PhoneUiState) {
     var host by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
-    var custom by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val micLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) vm.startListening() else vm.onMicDenied()
+    }
 
     Column(
         Modifier
@@ -122,10 +130,28 @@ private fun HomeScreen(vm: PhoneViewModel, state: PhoneUiState) {
         }
 
         Card {
-            Text("لغة الترجمة", color = VoxColors.White, fontWeight = FontWeight.SemiBold)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                DialectMode.values().forEach { m ->
-                    VoxButton(m.label, state.mode == m) { vm.setMode(m) }
+            Text("الترجمة الحية (إنكليزي ← عربي فصحى)", color = VoxColors.White, fontWeight = FontWeight.SemiBold)
+            Text(state.engineStatus, color = VoxColors.Gray, fontSize = 12.sp)
+            if (!state.modelReady) VoxButton("إعادة المحاولة", true) { vm.retryModel() }
+            Text(
+                "ضع الهاتف قرب سماعة التلفزيون أو اللعبة. اللغة المنطوقة المدعومة حالياً: الإنكليزية.",
+                color = VoxColors.Gray,
+                fontSize = 12.sp,
+            )
+            if (state.partial.isNotEmpty()) {
+                Text(state.partial, color = VoxColors.Purple, fontSize = 14.sp)
+            }
+            state.problem?.let { Text(it, color = Color(0xFFF87171), fontSize = 12.sp) }
+            VoxButton(if (state.listening) "إيقاف الاستماع" else "ابدأ الاستماع", !state.listening) {
+                if (state.listening) {
+                    vm.stopListening()
+                } else if (
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    vm.startListening()
+                } else {
+                    micLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 }
             }
         }
@@ -144,19 +170,14 @@ private fun HomeScreen(vm: PhoneViewModel, state: PhoneUiState) {
         }
 
         Card {
-            Text("وضع التجربة (Mock)", color = VoxColors.White, fontWeight = FontWeight.SemiBold)
+            Text("تجربة بدون ميكروفون (Mock)", color = VoxColors.White, fontWeight = FontWeight.SemiBold)
             Text(
-                "يرسل جمل ألعاب تجريبية مترجمة إلى التلفزيون. لا يحتاج إنترنت ولا API.",
+                "يرسل جمل ألعاب جاهزة مترجمة إلى التلفزيون لاختبار الاتصال والعرض.",
                 color = VoxColors.Gray,
                 fontSize = 12.sp,
             )
-            VoxButton(if (state.running) "إيقاف التجربة" else "ابدأ التجربة", !state.running) {
+            VoxButton(if (state.mockRunning) "إيقاف التجربة" else "ابدأ التجربة", !state.mockRunning) {
                 vm.toggleMock()
-            }
-            VoxField(custom, { custom = it }, "اكتب جملة إنكليزية للتجربة", KeyboardType.Text)
-            VoxButton("إرسال الجملة", true) {
-                vm.sendCustom(custom)
-                custom = ""
             }
         }
     }
@@ -179,7 +200,6 @@ private fun HistoryScreen(state: PhoneUiState) {
             Card {
                 Text(s.original, color = VoxColors.Gray, fontSize = 12.sp)
                 Text(s.translated, color = VoxColors.White, fontSize = 18.sp)
-                Text(s.mode.label, color = VoxColors.Purple, fontSize = 11.sp)
             }
         }
         item { Spacer(Modifier.height(16.dp)) }

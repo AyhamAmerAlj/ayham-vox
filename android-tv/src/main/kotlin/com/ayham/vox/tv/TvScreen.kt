@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayham.vox.core.Protocol
 import com.ayham.vox.core.UpdateState
+import com.ayham.vox.core.VoxTypography
 import com.ayham.vox.core.label
 
 private val Black = Color(0xFF05050A)
@@ -36,6 +37,7 @@ private val Gray = Color(0xFF9A9AA8)
 fun TvTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = darkColorScheme(primary = Purple, background = Black, surface = Black),
+        typography = VoxTypography,
         content = content,
     )
 }
