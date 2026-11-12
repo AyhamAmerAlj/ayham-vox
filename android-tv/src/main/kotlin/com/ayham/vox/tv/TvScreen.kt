@@ -24,6 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayham.vox.core.Protocol
+import com.ayham.vox.core.UpdateState
+import com.ayham.vox.core.label
 
 private val Black = Color(0xFF05050A)
 private val Purple = Color(0xFF7B2FF7)
@@ -105,9 +107,15 @@ private fun IdleInfo(state: TvUiState, modifier: Modifier) {
         state.error?.let { Text(it, fontSize = 18.sp, color = Color(0xFFF87171)) }
 
         Text(
-            "▲ ▼ حجم الخط (${state.fontSp})    •    OK نقل الترجمة (${if (state.atBottom) "أسفل" else "أعلى"})",
+            "▲ ▼ حجم الخط (${state.fontSp})    •    OK نقل الترجمة (${if (state.atBottom) "أسفل" else "أعلى"})    •    ▶ تحديث",
             fontSize = 16.sp,
             color = Gray,
+        )
+        val updateLabel = state.update.label()
+        Text(
+            "build ${state.build}" + if (updateLabel.isNotEmpty()) "  —  $updateLabel" else "",
+            fontSize = 16.sp,
+            color = if (state.update is UpdateState.Available) Color(0xFF4ADE80) else Gray,
         )
     }
 }

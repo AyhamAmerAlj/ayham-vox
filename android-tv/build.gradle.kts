@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val voxBuild = (project.findProperty("voxBuild") as String?)?.toIntOrNull() ?: 1
+
 android {
     namespace = "com.ayham.vox.tv"
     compileSdk = 35
@@ -12,8 +14,22 @@ android {
         applicationId = "com.ayham.vox.tv"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = voxBuild
+        versionName = "0.1.$voxBuild"
+    }
+
+    signingConfigs {
+        create("vox") {
+            storeFile = rootProject.file("signing/ayham-vox.jks")
+            storePassword = "ayhamvox"
+            keyAlias = "ayhamvox"
+            keyPassword = "ayhamvox"
+        }
+    }
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("vox")
+        }
     }
 
     compileOptions {

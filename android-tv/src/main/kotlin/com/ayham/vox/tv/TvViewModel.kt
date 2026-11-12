@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.ayham.vox.core.NetUtil
 import com.ayham.vox.core.Protocol
 import com.ayham.vox.core.Subtitle
+import com.ayham.vox.core.UpdateController
+import com.ayham.vox.core.UpdateState
 import com.ayham.vox.core.VoxServer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,6 +27,8 @@ data class TvUiState(
     val fontSp: Int = 40,
     val atBottom: Boolean = true,
     val error: String? = null,
+    val update: UpdateState = UpdateState.Idle,
+    val build: Int = 0,
 )
 
 class TvViewModel(app: Application) : AndroidViewModel(app) {
@@ -44,8 +48,24 @@ class TvViewModel(app: Application) : AndroidViewModel(app) {
     private var server: VoxServer? = null
     @Volatile private var clearJob: Job? = null
 
+    private val updater = UpdateController(app, "ayham-vox-tv.apk") { u ->
+        _state.update { it.copy(update = u) }
+    }
+
     init {
+        _state.update { it.copy(build = updater.installedBuild()) }
         startServer()
+        updater.check()
+    }
+
+    /** زر ▶ بالريموت: فحص التحديث، وإذا يوجد تحديث يحمّله ويثبّته. */
+    fun updateAction() {
+        val u = _state.value.update
+        if (u is UpdateState.Available || u is UpdateState.NeedPermission) {
+            updater.downloadAndInstall()
+        } else if (u !is UpdateState.Downloading && u !is UpdateState.Installing) {
+            updater.check()
+        }
     }
 
     private fun startServer() {

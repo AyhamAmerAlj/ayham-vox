@@ -41,7 +41,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayham.vox.core.DialectMode
+import com.ayham.vox.core.UpdateState
 import com.ayham.vox.core.VoxClient
+import com.ayham.vox.core.label
 
 @Composable
 fun VoxApp(vm: PhoneViewModel) {
@@ -124,6 +126,19 @@ private fun HomeScreen(vm: PhoneViewModel, state: PhoneUiState) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 DialectMode.values().forEach { m ->
                     VoxButton(m.label, state.mode == m) { vm.setMode(m) }
+                }
+            }
+        }
+
+        Card {
+            Text("التحديث", color = VoxColors.White, fontWeight = FontWeight.SemiBold)
+            Text("الإصدار الحالي: build ${state.build}", color = VoxColors.Gray, fontSize = 12.sp)
+            val label = state.update.label()
+            if (label.isNotEmpty()) Text(label, color = VoxColors.White, fontSize = 13.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                VoxButton("فحص", state.update !is UpdateState.Available) { vm.checkUpdate() }
+                if (state.update is UpdateState.Available || state.update is UpdateState.NeedPermission) {
+                    VoxButton("حدّث الآن", true) { vm.installUpdate() }
                 }
             }
         }

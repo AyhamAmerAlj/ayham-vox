@@ -7,6 +7,8 @@ import com.ayham.vox.core.DialectMode
 import com.ayham.vox.core.MockTranslationEngine
 import com.ayham.vox.core.Subtitle
 import com.ayham.vox.core.SubtitleDeduper
+import com.ayham.vox.core.UpdateController
+import com.ayham.vox.core.UpdateState
 import com.ayham.vox.core.VoxClient
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,6 +24,8 @@ data class PhoneUiState(
     val mode: DialectMode = DialectMode.FUSHA,
     val running: Boolean = false,
     val history: List<Subtitle> = emptyList(),
+    val update: UpdateState = UpdateState.Idle,
+    val build: Int = 0,
 )
 
 class PhoneViewModel(app: Application) : AndroidViewModel(app) {
@@ -34,6 +38,19 @@ class PhoneViewModel(app: Application) : AndroidViewModel(app) {
     private val client = VoxClient { s -> _state.update { it.copy(connection = s) } }
     private var job: Job? = null
     private var nextId = 1L
+
+    private val updater = UpdateController(app, "ayham-vox-phone.apk") { u ->
+        _state.update { it.copy(update = u) }
+    }
+
+    init {
+        _state.update { it.copy(build = updater.installedBuild()) }
+        updater.check()
+    }
+
+    fun checkUpdate() = updater.check()
+
+    fun installUpdate() = updater.downloadAndInstall()
 
     fun connect(host: String, code: String) = client.connect(host, code)
 

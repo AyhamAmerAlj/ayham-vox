@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
         return when (keyCode) {
             KeyEvent.KEYCODE_DPAD_UP -> { vm.biggerFont(); true }
             KeyEvent.KEYCODE_DPAD_DOWN -> { vm.smallerFont(); true }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> { vm.updateAction(); true }
             KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_ENTER -> { vm.togglePosition(); true }
             else -> super.onKeyDown(keyCode, event)

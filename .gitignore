@@ -4,8 +4,6 @@ local.properties
 .idea/
 *.iml
 *.apk
-*.keystore
-*.jks
 .DS_Store
 node_modules/
 .env
